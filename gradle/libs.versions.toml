@@ -4,7 +4,26 @@
 [versions]
 guava = "32.1.3-jre"
 junit-jupiter = "5.10.1"
+lombok = "1.18.36"
+slf4j = "2.0.16"
+jackson-databind = "2.18.3"
+jackson-dataformat = "2.17.0"
+snakeyaml = "2.2"
+mockito = "5.17.0"
+bytebuddy = "1.14.11"
+spring-boot = "3.2.5"
 
 [libraries]
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
+jackson-dataformat = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson-dataformat" }
+snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito"}
+bytebuddy = { module = "net.bytebuddy:byte-buddy-agent", version.ref = "bytebuddy" }
+spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter", version.ref = "spring-boot" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
+

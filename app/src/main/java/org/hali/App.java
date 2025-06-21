@@ -7,10 +7,10 @@ import com.sun.net.httpserver.HttpServer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hali.handler.webhook.WebhookHandler;
-import org.hali.http.security.KeyStoreProperties;
+import org.hali.http.security.TrustStoreProperties;
 import org.hali.http.security.TrustStoreConfigurer;
-import org.hali.http.server.HttpServerConsts;
 import org.hali.http.server.HttpServerFactory;
+import org.hali.http.server.HttpServerProperties;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,7 +23,8 @@ public class App implements CommandLineRunner {
     private final WebhookHandler webhookHandler;
     private final HttpServerFactory httpServerFactory;
     private final TrustStoreConfigurer trustStoreConfigurer;
-    private final KeyStoreProperties keyStoreProperties;
+    private final TrustStoreProperties trustStoreProperties;
+    private final HttpServerProperties httpServerProperties;
 
     public static void main(String[] args) {
         SpringApplication.run(App.class, args);
@@ -31,13 +32,13 @@ public class App implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        final var host = HttpServerConsts.getDefaultHost();
-        final var port = HttpServerConsts.getDefaultPort();
+        final var host = this.httpServerProperties.getHost();
+        final var port = this.httpServerProperties.getPort();
 
-        if (this.keyStoreProperties.isTlsEnabled()) {
+        if (this.trustStoreProperties.isEnableTrustStore()) {
             // This is enabled for e2e test, we are using Wiremock (as a server) so we need to define trust store
             // Our app is going to "trust" the remote "wiremock server" in e2e test
-            this.trustStoreConfigurer.setupTrustStore(this.keyStoreProperties.getKeyStores());
+            this.trustStoreConfigurer.setupTrustStore(this.trustStoreProperties.getKeyStores());
         }
 
         final HttpServer httpServer = this.httpServerFactory.create(host, port);

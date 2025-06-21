@@ -33,7 +33,7 @@ public class TlsTrustStoreConfigurer implements TrustStoreConfigurer {
     public void setupTrustStore(List<KeyStoreCredentials> keyStoreCredentials)
         throws SslInitializationException {
         try {
-            log.info("Enabling TLS");
+            log.info("Setting up Trust Store");
 
             final KeyStore keyStore = this.keyStoreFactory.createKeyStore();
 
@@ -56,7 +56,7 @@ public class TlsTrustStoreConfigurer implements TrustStoreConfigurer {
 
             this.httpsSslConfigurator.apply(sslContext);
 
-            log.info("Successfully enabled TLS");
+            log.info("Successfully setup Trust Store");
         } catch (KeyStoreException | NoSuchAlgorithmException | IOException |
                  CertificateException | KeyManagementException |
                  ClasspathResourceLoadingException e) {

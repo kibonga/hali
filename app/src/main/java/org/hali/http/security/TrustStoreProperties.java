@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "security")
 @Getter
 @Setter
-public class KeyStoreProperties {
-    private boolean tlsEnabled;
+public class TrustStoreProperties {
+    private boolean enableTrustStore;
     private List<KeyStoreCredentials> keyStores;
 }

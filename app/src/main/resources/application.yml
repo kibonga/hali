@@ -1,0 +1,5 @@
+security:
+  tls-enabled: true
+  keystores:
+    - path: svc_wiremock.jks
+      password:

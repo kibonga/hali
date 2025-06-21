@@ -7,8 +7,8 @@ import com.sun.net.httpserver.HttpServer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hali.handler.webhook.WebhookHandler;
-import org.hali.http.security.SslSecurityManager;
-import org.hali.http.security.TlsConfigurationProvider;
+import org.hali.http.security.KeyStoreProperties;
+import org.hali.http.security.TrustStoreConfigurer;
 import org.hali.http.server.HttpServerConsts;
 import org.hali.http.server.HttpServerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -22,8 +22,8 @@ public class App implements CommandLineRunner {
 
     private final WebhookHandler webhookHandler;
     private final HttpServerFactory httpServerFactory;
-    private final SslSecurityManager sslSecurityManager;
-    private final TlsConfigurationProvider tlsConfigurationProvider;
+    private final TrustStoreConfigurer trustStoreConfigurer;
+    private final KeyStoreProperties keyStoreProperties;
 
     public static void main(String[] args) {
         SpringApplication.run(App.class, args);
@@ -34,12 +34,10 @@ public class App implements CommandLineRunner {
         final var host = HttpServerConsts.getDefaultHost();
         final var port = HttpServerConsts.getDefaultPort();
 
-        if (this.tlsConfigurationProvider.isTlsEnabled()) {
+        if (this.keyStoreProperties.isTlsEnabled()) {
             // This is enabled for e2e test, we are using Wiremock (as a server) so we need to define trust store
             // Our app is going to "trust" the remote "wiremock server" in e2e test
-            this.sslSecurityManager.enableSsl(
-                this.tlsConfigurationProvider.getKeystorePath(),
-                this.tlsConfigurationProvider.getKeystorePassword());
+            this.trustStoreConfigurer.setupTrustStore(this.keyStoreProperties.getKeyStores());
         }
 
         final HttpServer httpServer = this.httpServerFactory.create(host, port);

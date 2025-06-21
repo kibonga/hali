@@ -1,6 +1,7 @@
 package org.hali.resource;
 
 import java.io.InputStream;
+import org.hali.exception.ClasspathResourceLoadingException;
 
 public class ClasspathResourceLoader implements ResourceLoader {
 
@@ -11,12 +12,14 @@ public class ClasspathResourceLoader implements ResourceLoader {
     }
 
     @Override
-    public InputStream getInputStream(String path) {
+    public InputStream getInputStream(String path)
+        throws ClasspathResourceLoadingException {
         final InputStream is =
             this.resourceClass.getClassLoader().getResourceAsStream(path);
 
         if (is == null) {
-            // TODO - add error handler
+            throw new ClasspathResourceLoadingException(
+                "Could not find resource on path: " + path);
         }
 
         return is;

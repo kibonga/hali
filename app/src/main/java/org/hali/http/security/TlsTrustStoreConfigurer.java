@@ -8,16 +8,20 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
+import java.util.List;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.hali.exception.ClasspathResourceLoadingException;
 import org.hali.exception.SslInitializationException;
 import org.hali.resource.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class TlsSslSecurityManager implements SslSecurityManager {
+@Slf4j
+public class TlsTrustStoreConfigurer implements TrustStoreConfigurer {
 
     private final KeyStoreFactory keyStoreFactory;
     private final SslTrustManagerFactory sslTrustManagerFactory;
@@ -26,14 +30,19 @@ public class TlsSslSecurityManager implements SslSecurityManager {
     private final HttpsSslConfigurator httpsSslConfigurator;
 
     @Override
-    public void enableSsl(String keystorePath, String keystorePassword)
+    public void setupTrustStore(List<KeyStoreCredentials> keyStoreCredentials)
         throws SslInitializationException {
         try {
+            log.info("Enabling TLS");
+
             final KeyStore keyStore = this.keyStoreFactory.createKeyStore();
 
-            try (final InputStream keyStoreStream =
-                this.resourceLoader.getInputStream(keystorePath)) {
-                keyStore.load(keyStoreStream, keystorePassword.toCharArray());
+            for (KeyStoreCredentials keyStoreCredential : keyStoreCredentials) {
+                try (final InputStream keyStoreStream = this.resourceLoader.getInputStream(
+                    keyStoreCredential.path())) {
+                    keyStore.load(keyStoreStream,
+                        keyStoreCredential.password().toCharArray());
+                }
             }
 
             final TrustManagerFactory trustManagerFactory =
@@ -46,9 +55,13 @@ public class TlsSslSecurityManager implements SslSecurityManager {
                 new SecureRandom());
 
             this.httpsSslConfigurator.apply(sslContext);
+
+            log.info("Successfully enabled TLS");
         } catch (KeyStoreException | NoSuchAlgorithmException | IOException |
-                 CertificateException | KeyManagementException e) {
-            throw new SslInitializationException("Failed to initialize SSL.", e);
+                 CertificateException | KeyManagementException |
+                 ClasspathResourceLoadingException e) {
+            throw new SslInitializationException("Failed to initialize SSL.",
+                e);
         }
     }
 }

@@ -5,17 +5,16 @@ import org.hali.exception.ClasspathResourceLoadingException;
 
 public class ClasspathResourceLoader implements ResourceLoader {
 
-    private final Class<?> resourceClass;
+    private final ClassLoader classLoader;
 
-    public ClasspathResourceLoader(Class<?> resourceClass) {
-        this.resourceClass = resourceClass;
+    public ClasspathResourceLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
     }
 
     @Override
     public InputStream getInputStream(String path)
         throws ClasspathResourceLoadingException {
-        final InputStream is =
-            this.resourceClass.getClassLoader().getResourceAsStream(path);
+        final InputStream is = this.classLoader.getResourceAsStream(path);
 
         if (is == null) {
             throw new ClasspathResourceLoadingException(

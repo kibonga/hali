@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": ".*\\\\\\\\/statuses\\\\\\\\\\\\\\\\/.*"
+  },
+  "response": {
+    "status": 200,
+    "body": "End to end test completed successfully!",
+    "headers": {
+      "Content-Type": "text/plain"
+    }
+  }
+}

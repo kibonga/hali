@@ -1,22 +1,27 @@
 package org.hali.handler.webhook;
 
-import static java.util.Objects.isNull;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.hali.common.model.GithubEventContext;
 import org.hali.exception.ExtractingException;
+import org.hali.exception.GithubEventContextParsingException;
 import org.hali.functional.ConsumerResolver;
-import org.hali.handler.model.RepositoryInfo;
+import org.hali.handler.webhook.parser.GithubEventContextParser;
 import org.hali.http.extractor.HeaderExtractor;
 import org.hali.http.responder.HttpExchangeResponder;
 import org.hali.json.JsonExtractor;
 import org.hali.json.JsonParserResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.concurrent.Executor;
+
+import static java.util.Objects.isNull;
 
 @RequiredArgsConstructor
 @Component
@@ -28,20 +33,23 @@ public class WebhookHandler implements HttpHandler {
 
     private final HeaderExtractor headerExtractor;
     private final HttpExchangeResponder httpExchangeResponder;
-    private final ConsumerResolver<RepositoryInfo>
-        repositoryInfoConsumerResolver;
-    private final JsonParserResolver<JsonNode, RepositoryInfo>
+    private final ConsumerResolver<GithubEventContext>
+        githubEventContextConsumerResolver;
+    private final JsonParserResolver<JsonNode, String, GithubEventContext>
         jsonParserResolver;
     private final JsonExtractor jsonExtractor;
+    @Qualifier("applicationTaskExecutor")
+    private final Executor executor;
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        // Extract event
+        // Extract and validate GitHub event
+        log.info("Extracting '{}' header", GITHUB_EVENT);
         final String githubEvent =
             this.headerExtractor.extract(exchange.getRequestHeaders(),
                 GITHUB_EVENT);
+        log.info("Github event: {} extracted", githubEvent);
 
-        // Validate event
         if (isNull(githubEvent)) {
             log.error("Github header '{}' not found in request", GITHUB_EVENT);
             this.httpExchangeResponder.error(exchange, 400,
@@ -49,48 +57,64 @@ public class WebhookHandler implements HttpHandler {
             return;
         }
 
-        // Find handler for the event (push, pull_request...)
-        final var repositoryInfoConsumer =
-            this.repositoryInfoConsumerResolver.resolve(githubEvent);
+        // Find and validate GitHubEventContext consumer for the GitHub event (push, pull_request...)
+        log.info("Finding GitHubEventContext consumer for: {}", githubEvent);
+        final var githubEventContextConsumer =
+            this.githubEventContextConsumerResolver.resolve(githubEvent);
 
-        // Validate handler
-        if (isNull(repositoryInfoConsumer)) {
-            log.error("Invalid Github event: {}", githubEvent);
+        if (isNull(githubEventContextConsumer)) {
+            log.error(
+                "Failed to find GitHubEventContext consumer for Github event: {}",
+                githubEvent);
             this.httpExchangeResponder.error(exchange, 422,
                 "Invalid Github event");
             return;
         }
+        log.info("GitHubEventContext consumer found");
 
-        // Find parser for the event (push, pull_request...)
-        final var repositoryParser =
-            this.jsonParserResolver.resolve(githubEvent);
+        // Find GitHubEventContext parser for the GitHub event (push, pull_request...)
+        log.info("Finding GitHubEventContext parser for: {}", githubEvent);
+        final var githubEventContextParser =
+            (GithubEventContextParser) this.jsonParserResolver.resolve(githubEvent);
 
-        // Validate parser
-        if (isNull(repositoryParser)) {
-            log.error("Invalid Github event: {}", githubEvent);
+        if (isNull(githubEventContextParser)) {
+            log.error(
+                "Failed to find GitHubEventContext parser for Github event: {}",
+                githubEvent);
             this.httpExchangeResponder.error(exchange, 422,
-                "Invalid Github event");
+                "Invalid Github event provided");
             return;
         }
+        log.info("GitHubEventContext parser found");
 
-        // Convert http exchange payload to JsonNode tree
+        // Extract http exchange payload into a JsonNode
+        JsonNode jsonNode = null;
         try {
-            final var res =
-                this.jsonExtractor.extract(exchange.getRequestBody());
-            final var res2 = repositoryParser.parse(res);
+            jsonNode = this.jsonExtractor.extract(exchange.getRequestBody());
         } catch (ExtractingException e) {
             log.error("Failed to extract webhook payload");
-            this.httpExchangeResponder.error(exchange, 422,
-                "Failed to extract webhook payload");
+            this.httpExchangeResponder.error(exchange, 423,
+                "Invalid payload provided");
             return;
         }
 
-        // Parse JsonNode tree into info about repository (build_check_url, commit_hash, branch...)
+        // Parse JsonNode into GitHubEventContext (e.g. build_check_url, commit_hash, branch, etc.)
+        try {
+            final var githubEventContext = githubEventContextParser.parse(jsonNode, githubEvent);
 
-        // Validate repository info
+            // Run the consumer task in separate thread
+            final Runnable githubEventContextTask =
+                () -> githubEventContextConsumer.accept(githubEventContext);
+            this.executor.execute(githubEventContextTask);
 
-        // Consume repository info via handler
+            // Respond success to GitHub
+            this.httpExchangeResponder.succes(exchange, 200, 0);
 
-        // Respond to GitHub
+        } catch (GithubEventContextParsingException e) {
+            log.error("Failed to parse GitHubEventContext for event: {}", githubEvent, e);
+            this.httpExchangeResponder.error(exchange, 423,
+                "Invalid Github event provided");
+        }
+
     }
 }

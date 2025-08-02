@@ -2,15 +2,15 @@ package org.hali.handler.push;
 
 import java.util.function.Consumer;
 import org.hali.functional.ConsumerHandler;
-import org.hali.handler.model.RepositoryInfo;
+import org.hali.common.model.GithubEventContext;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PushHandler implements ConsumerHandler<RepositoryInfo> {
+public class PushHandler implements ConsumerHandler<GithubEventContext> {
 
     @Override
-    public Consumer<RepositoryInfo> consumer() {
-        return repositoryInfo -> {
+    public Consumer<GithubEventContext> consumer() {
+        return githubEventContext -> {
 
         };
     }

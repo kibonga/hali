@@ -3,12 +3,12 @@
  */
 package org.hali;
 
+import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hali.handler.webhook.WebhookHandler;
-import org.hali.http.security.TrustStoreProperties;
-import org.hali.http.security.TrustStoreConfigurer;
+import org.hali.security.ssl.TrustStoreProperties;
+import org.hali.security.ssl.TrustStoreConfigurer;
 import org.hali.http.server.HttpServerFactory;
 import org.hali.http.server.HttpServerProperties;
 import org.springframework.boot.CommandLineRunner;
@@ -20,7 +20,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @RequiredArgsConstructor
 public class App implements CommandLineRunner {
 
-    private final WebhookHandler webhookHandler;
+    private final HttpHandler webhookHandler;
     private final HttpServerFactory httpServerFactory;
     private final TrustStoreConfigurer trustStoreConfigurer;
     private final TrustStoreProperties trustStoreProperties;
@@ -35,7 +35,7 @@ public class App implements CommandLineRunner {
         final var host = this.httpServerProperties.getHost();
         final var port = this.httpServerProperties.getPort();
 
-        if (this.trustStoreProperties.isEnableTrustStore()) {
+        if (this.trustStoreProperties.isEnable()) {
             // This is enabled for e2e test, we are using Wiremock (as a server) so we need to define trust store
             // Our app is going to "trust" the remote "wiremock server" in e2e test
             this.trustStoreConfigurer.setupTrustStore(this.trustStoreProperties.getKeyStores());
@@ -43,7 +43,7 @@ public class App implements CommandLineRunner {
 
         final HttpServer httpServer = this.httpServerFactory.create(host, port);
 
-        httpServer.createContext("/webhook/hali", this.webhookHandler);
+        httpServer.createContext("/webhook/handler/pipeline", this.webhookHandler);
 
         log.info("Http server started on port {}", port);
         httpServer.start();

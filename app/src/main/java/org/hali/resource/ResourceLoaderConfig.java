@@ -9,6 +9,6 @@ public class ResourceLoaderConfig {
 
     @Bean
     public ResourceLoader classpathResourceLoader() {
-        return new ClasspathResourceLoader(App.class);
+        return new ClasspathResourceLoader(App.class.getClassLoader());
     }
 }

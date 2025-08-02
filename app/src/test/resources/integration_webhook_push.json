@@ -1,0 +1,194 @@
+{
+  "ref": "refs/heads/hotfix/testing-hotfix-2",
+  "before": "0000000000000000000000000000000000000000",
+  "after": "bc27e39048f4879bc0b54e33c4092f0d2e43eea7",
+  "repository": {
+    "id": 958046980,
+    "node_id": "R_kgDOORqjBA",
+    "name": "int-test-proj",
+    "full_name": "kibonga/int-test-proj",
+    "private": false,
+    "owner": {
+      "name": "kibonga",
+      "email": "66330623+kibonga@users.noreply.github.com",
+      "login": "kibonga",
+      "id": 66330623,
+      "node_id": "MDQ6VXNlcjY2MzMwNjIz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/66330623?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/kibonga",
+      "html_url": "https://github.com/kibonga",
+      "followers_url": "https://api.github.com/users/kibonga/followers",
+      "following_url": "https://api.github.com/users/kibonga/following{/other_user}",
+      "gists_url": "https://api.github.com/users/kibonga/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/kibonga/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/kibonga/subscriptions",
+      "organizations_url": "https://api.github.com/users/kibonga/orgs",
+      "repos_url": "https://api.github.com/users/kibonga/repos",
+      "events_url": "https://api.github.com/users/kibonga/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/kibonga/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "html_url": "https://github.com/kibonga/int-test-proj",
+    "description": null,
+    "fork": false,
+    "url": "https://api.github.com/repos/kibonga/int-test-proj",
+    "forks_url": "https://api.github.com/repos/kibonga/int-test-proj/forks",
+    "keys_url": "https://api.github.com/repos/kibonga/int-test-proj/keys{/key_id}",
+    "collaborators_url": "https://api.github.com/repos/kibonga/int-test-proj/collaborators{/collaborator}",
+    "teams_url": "https://api.github.com/repos/kibonga/int-test-proj/teams",
+    "hooks_url": "https://api.github.com/repos/kibonga/int-test-proj/hooks",
+    "issue_events_url": "https://api.github.com/repos/kibonga/int-test-proj/issues/events{/number}",
+    "events_url": "https://api.github.com/repos/kibonga/int-test-proj/events",
+    "assignees_url": "https://api.github.com/repos/kibonga/int-test-proj/assignees{/user}",
+    "branches_url": "https://api.github.com/repos/kibonga/int-test-proj/branches{/branch}",
+    "tags_url": "https://api.github.com/repos/kibonga/int-test-proj/tags",
+    "blobs_url": "https://api.github.com/repos/kibonga/int-test-proj/git/blobs{/sha}",
+    "git_tags_url": "https://api.github.com/repos/kibonga/int-test-proj/git/tags{/sha}",
+    "git_refs_url": "https://api.github.com/repos/kibonga/int-test-proj/git/refs{/sha}",
+    "trees_url": "https://api.github.com/repos/kibonga/int-test-proj/git/trees{/sha}",
+    "statuses_url": "https://api.github.com/repos/kibonga/int-test-proj/statuses/{sha}",
+    "languages_url": "https://api.github.com/repos/kibonga/int-test-proj/languages",
+    "stargazers_url": "https://api.github.com/repos/kibonga/int-test-proj/stargazers",
+    "contributors_url": "https://api.github.com/repos/kibonga/int-test-proj/contributors",
+    "subscribers_url": "https://api.github.com/repos/kibonga/int-test-proj/subscribers",
+    "subscription_url": "https://api.github.com/repos/kibonga/int-test-proj/subscription",
+    "commits_url": "https://api.github.com/repos/kibonga/int-test-proj/commits{/sha}",
+    "git_commits_url": "https://api.github.com/repos/kibonga/int-test-proj/git/commits{/sha}",
+    "comments_url": "https://api.github.com/repos/kibonga/int-test-proj/comments{/number}",
+    "issue_comment_url": "https://api.github.com/repos/kibonga/int-test-proj/issues/comments{/number}",
+    "contents_url": "https://api.github.com/repos/kibonga/int-test-proj/contents/{+path}",
+    "compare_url": "https://api.github.com/repos/kibonga/int-test-proj/compare/{base}...{head}",
+    "merges_url": "https://api.github.com/repos/kibonga/int-test-proj/merges",
+    "archive_url": "https://api.github.com/repos/kibonga/int-test-proj/{archive_format}{/ref}",
+    "downloads_url": "https://api.github.com/repos/kibonga/int-test-proj/downloads",
+    "issues_url": "https://api.github.com/repos/kibonga/int-test-proj/issues{/number}",
+    "pulls_url": "https://api.github.com/repos/kibonga/int-test-proj/pulls{/number}",
+    "milestones_url": "https://api.github.com/repos/kibonga/int-test-proj/milestones{/number}",
+    "notifications_url": "https://api.github.com/repos/kibonga/int-test-proj/notifications{?since,all,participating}",
+    "labels_url": "https://api.github.com/repos/kibonga/int-test-proj/labels{/name}",
+    "releases_url": "https://api.github.com/repos/kibonga/int-test-proj/releases{/id}",
+    "deployments_url": "https://api.github.com/repos/kibonga/int-test-proj/deployments",
+    "created_at": 1743433055,
+    "updated_at": "2025-04-26T17:25:33Z",
+    "pushed_at": 1749895859,
+    "git_url": "git://github.com/kibonga/int-test-proj.git",
+    "ssh_url": "git@github.com:kibonga/int-test-proj.git",
+    "clone_url": "https://github.com/kibonga/int-test-proj.git",
+    "svn_url": "https://github.com/kibonga/int-test-proj",
+    "homepage": null,
+    "size": 61,
+    "stargazers_count": 0,
+    "watchers_count": 0,
+    "language": "Java",
+    "has_issues": true,
+    "has_projects": true,
+    "has_downloads": true,
+    "has_wiki": true,
+    "has_pages": false,
+    "has_discussions": false,
+    "forks_count": 0,
+    "mirror_url": null,
+    "archived": false,
+    "disabled": false,
+    "open_issues_count": 2,
+    "license": null,
+    "allow_forking": true,
+    "is_template": false,
+    "web_commit_signoff_required": false,
+    "topics": [
+
+    ],
+    "visibility": "public",
+    "forks": 0,
+    "open_issues": 2,
+    "watchers": 0,
+    "default_branch": "master",
+    "stargazers": 0,
+    "master_branch": "master"
+  },
+  "pusher": {
+    "name": "kibonga",
+    "email": "66330623+kibonga@users.noreply.github.com"
+  },
+  "sender": {
+    "login": "kibonga",
+    "id": 66330623,
+    "node_id": "MDQ6VXNlcjY2MzMwNjIz",
+    "avatar_url": "https://avatars.githubusercontent.com/u/66330623?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/kibonga",
+    "html_url": "https://github.com/kibonga",
+    "followers_url": "https://api.github.com/users/kibonga/followers",
+    "following_url": "https://api.github.com/users/kibonga/following{/other_user}",
+    "gists_url": "https://api.github.com/users/kibonga/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/kibonga/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/kibonga/subscriptions",
+    "organizations_url": "https://api.github.com/users/kibonga/orgs",
+    "repos_url": "https://api.github.com/users/kibonga/repos",
+    "events_url": "https://api.github.com/users/kibonga/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/kibonga/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "created": true,
+  "deleted": false,
+  "forced": false,
+  "base_ref": null,
+  "compare": "https://github.com/kibonga/int-test-proj/commit/bc27e39048f4",
+  "commits": [
+    {
+      "id": "bc27e39048f4879bc0b54e33c4092f0d2e43eea7",
+      "tree_id": "673b5f3c412121ae51f752cefda637387bb547e6",
+      "distinct": true,
+      "message": "commit 2",
+      "timestamp": "2025-06-14T12:10:47+02:00",
+      "url": "https://github.com/kibonga/int-test-proj/commit/bc27e39048f4879bc0b54e33c4092f0d2e43eea7",
+      "author": {
+        "name": "Pavle Durdic",
+        "email": "pavle.durdic.ext@infront.co"
+      },
+      "committer": {
+        "name": "Pavle Durdic",
+        "email": "pavle.durdic.ext@infront.co"
+      },
+      "added": [
+
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+        "app/src/main/java/org/example/App.java"
+      ]
+    }
+  ],
+  "head_commit": {
+    "id": "bc27e39048f4879bc0b54e33c4092f0d2e43eea7",
+    "tree_id": "673b5f3c412121ae51f752cefda637387bb547e6",
+    "distinct": true,
+    "message": "commit 2",
+    "timestamp": "2025-06-14T12:10:47+02:00",
+    "url": "https://github.com/kibonga/int-test-proj/commit/bc27e39048f4879bc0b54e33c4092f0d2e43eea7",
+    "author": {
+      "name": "Pavle Durdic",
+      "email": "pavle.durdic.ext@infront.co"
+    },
+    "committer": {
+      "name": "Pavle Durdic",
+      "email": "pavle.durdic.ext@infront.co"
+    },
+    "added": [
+
+    ],
+    "removed": [
+
+    ],
+    "modified": [
+      "app/src/main/java/org/example/App.java"
+    ]
+  }
+}

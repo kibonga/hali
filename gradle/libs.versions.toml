@@ -12,6 +12,10 @@ snakeyaml = "2.2"
 mockito = "5.17.0"
 bytebuddy = "1.14.11"
 spring-boot = "3.2.5"
+wiremock = "3.13.1"
+test-containers = "1.21.3"
+test-containers-junit = "1.21.3"
+test-containers-git-server = "0.8.0"
 
 [libraries]
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
@@ -26,4 +30,7 @@ mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.
 bytebuddy = { module = "net.bytebuddy:byte-buddy-agent", version.ref = "bytebuddy" }
 spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter", version.ref = "spring-boot" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
-
+wiremock-test = { module = "org.wiremock:wiremock", version.ref = "wiremock" }
+test-containers = { module = "org.testcontainers:testcontainers", version.ref = "test-containers" }
+test-container-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "test-containers-junit"}
+test-containers-git-server = { module = "io.github.sparsick.testcontainers.gitserver:testcontainers-gitserver", version.ref = "test-containers-git-server"}

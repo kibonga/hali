@@ -10,8 +10,10 @@ import org.springframework.stereotype.Component;
 public class WebhookResponder implements HttpExchangeResponder {
 
     @Override
-    public void succes(HttpExchange httpExchange) throws IOException {
-        httpExchange.sendResponseHeaders(200, 0);
+    public void succes(HttpExchange httpExchange, int status, long length)
+        throws IOException {
+        httpExchange.sendResponseHeaders(status, length);
+        httpExchange.getResponseBody().close();
     }
 
     @Override

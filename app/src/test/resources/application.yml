@@ -1,0 +1,30 @@
+http-server:
+  host: "0.0.0.0"
+  port: 8080
+test:
+  integration:
+    git-server:
+      dir-path: ${TEST_INTEGRATION_GIT_SERVER_DIR_PATH:/home/pdjurdjic/repos/edu/kibonga/kibonga-upstream}
+      repo-name: ${TEST_INTEGRATION_GIT_SERVER_REPO_NAME:kibonga-upstream-repo.git}
+      branch: ${TEST_INTEGRATION_GIT_SERVER_BRANCH:master}
+    ssh:
+      dir-path: classpath
+      private-key: classpath:kyes/id_client
+      public-key: classpath:kyes/id_client.pub
+    wiremock:
+      home-mappings: ${TEST_INTEGRATION_WIREMOCK_HOME_MAPPINGS:/home/pdjurdjic/repos/edu/hali/app/src/test/resources/mappings}
+      container-mappings: ${TEST_INTEGRATION_WIREMOCK_CONTAINER_MAPPINGS:/home/wiremock/mappings}
+  wiremock:
+    port: 4201
+api:
+  url-base: ${API_URL_BASE:http://localhost:8080/repos/}
+security:
+  ssl:
+    enable: true
+    keystores:
+      - path: svc_wiremock.jks
+        password: password
+  ssh:
+    enabled: ${SECURITY_SSH_ENABLED:true}
+    public-key: classpath:id_client.pub
+    private-key: classpath:id_client

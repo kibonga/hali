@@ -4,15 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hali.common.fs.DirectoryService;
 import org.hali.common.fs.FileLoader;
-import org.hali.common.model.BuildStatus;
 import org.hali.common.model.GithubEventContext;
-import org.hali.exception.ClasspathResourceLoadingException;
 import org.hali.exception.CloneRepositoryException;
-import org.hali.exception.PipelineBuildStatusResponderException;
 import org.hali.exception.PipelineRunnerException;
 import org.hali.exception.YamlParsingException;
 import org.hali.functional.ConsumerHandler;
-import org.hali.git.GitCommandExecutor;
+import org.hali.git.GitRepositoryCloner;
 import org.hali.pipeline.PipelineMatchingContext;
 import org.hali.pipeline.PipelineMatchingContextBuilder;
 import org.hali.pipeline.PipelineStepExtractor;
@@ -21,14 +18,15 @@ import org.hali.pipeline.runner.PipelineRunner;
 import org.hali.resource.ResourceLoader;
 import org.hali.yaml.YamlParser;
 
-import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -38,10 +36,10 @@ public abstract class AbstractGithubEventContextConsumerHandler implements Consu
     private static final String PIPELINE = "pipeline";
     private static final String YML_PIPELINE = "pipeline.yml";
 
-    private static final BiFunction<String, String, Path> yamlPathFunction = (workingDir, project) -> Path.of(workingDir, project, YML_PIPELINE);
+    private static final Function<String, Path> yamlPathFunction = workingDir -> Path.of(workingDir, YML_PIPELINE);
 
     private final DirectoryService directoryService;
-    private final GitCommandExecutor gitCommandExecutor;
+    private final GitRepositoryCloner gitRepositoryCloner;
     private final FileLoader fileLoader;
     private final ResourceLoader resourceLoader;
     private final YamlParser yamlParser;
@@ -54,63 +52,102 @@ public abstract class AbstractGithubEventContextConsumerHandler implements Consu
     public Consumer<GithubEventContext> consumer() {
         return githubEventContext -> {
 
-            // Create tmp dir where to clone the repo
-            log.info("Creating temp dir.");
-            final String tmpDir = System.getProperty("java.io.tmpdir");
-            final Path pipelineTmpPath = Path.of(tmpDir, PIPELINE);
+//            try {
+////                pipelineTempPath = Files.createTempDirectory("pipeline-");
+//            } catch (IOException e) {
+//                log.error("Failed to create temp dir for path: {}", pipelineTempPath, e);
+//
+//                return;
+//            }
+//            this.directoryService.create(pipelineTmpPath);
 
-            this.directoryService.create(pipelineTmpPath);
-
-            final Path projectPath = Paths.get(
-                pipelineTmpPath.toString(),
-                githubEventContext.getProjectName()
-            );
+//            final Path projectPath = Paths.get(
+//                pipelineTempPath.toString(),
+//                githubEventContext.getProjectName()
+//            );
 
             // Clone the repo
+            Path pipelineTempDirPath = null;
+            final String projectName = githubEventContext.getProjectName();
             try {
+                pipelineTempDirPath = Files.createTempDirectory("pipeline-" + projectName + "-");
                 log.info("Cloning the repository");
-                this.gitCommandExecutor.clone(githubEventContext, new File(pipelineTmpPath.toString()));
+                this.gitRepositoryCloner.clone(githubEventContext.getRepoUrl(), pipelineTempDirPath.toFile());
             } catch (CloneRepositoryException e) {
                 log.error("Error occurred while cloning the repository", e);
 
-                this.directoryService.remove(projectPath);
-
                 return;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
 
-            // Get the yaml from the /tmp/cloned_repo
-            final Path yamlPath = yamlPathFunction.apply(pipelineTmpPath.toString(), githubEventContext.getProjectName());
+//
+//            // Get the yaml from the /tmp/cloned_repo
+            final Path yamlpath = yamlPathFunction.apply(pipelineTempDirPath.toString());
 
-            // Load and execute pipeline.yml from cloned repo
+            // load and execute pipeline.yml from cloned repo
             try {
-                final InputStream is = this.resourceLoader.getInputStream(yamlPath.toString());
+//                final InputStream is = this.resourceLoader.getInputStream(yamlpath.toString());
+                final InputStream is = Files.newInputStream(yamlpath);
 
-                final Map<String, Object> yamlMap = this.yamlParser.parse(is);
+                final Map<String, Object> yamlmap = this.yamlParser.parse(is);
 
-                final PipelineMatchingContext pipelineMatchingContext = this.pipelineMatchingContextBuilder.build(githubEventContext);
+                final PipelineMatchingContext pipelinematchingcontext = this.pipelineMatchingContextBuilder.build(githubEventContext);
 
-                final List<String> pipelineSteps = this.pipelineStepExtractor.extractSteps(yamlMap, pipelineMatchingContext);
+                final Map<String, Object> pipelines = (Map<String, Object>) yamlmap.get("pipelines");
 
-                if (!pipelineSteps.isEmpty()) {
-                    this.pipelineRunner.run(pipelineSteps, projectPath);
+                final List<String> pipelineSteps = this.pipelineStepExtractor.extractSteps(pipelines, pipelinematchingcontext);
+
+                final var pipelinePath = pipelineTempDirPath;
+                final CompletableFuture<Boolean> runPipelineFuture = CompletableFuture.supplyAsync(() -> {
+                    if (pipelineSteps.isEmpty()) {
+                        log.info("No pipeline steps found.");
+                        return false;
+                    }
+
+                    try {
+                        return this.pipelineRunner.run(pipelineSteps, pipelinePath);
+                    } catch (IOException e) {
+                        log.error("Failed to run pipeline steps", e);
+                        return false;
+                    }
+                });
+
+                final var pipelineRunResult = runPipelineFuture.join();
+
+                log.info("Pipeline run completed");
+
+                if (pipelineRunResult) {
+                    log.info("Successfully run the pipeline");
                 } else {
-                    log.info("No pipeline steps found.");
+                    log.info("Error running the pipeline");
                 }
-            } catch (ClasspathResourceLoadingException | YamlParsingException |
+
+
+//                if (!pipelineSteps.isEmpty()) {
+//                    this.pipelineRunner.run(pipelineSteps, pipelineTempDirPath);
+//                } else {
+//                    log.info("no pipeline steps found.");
+//                }
+            } catch (YamlParsingException |
                      PipelineRunnerException e) {
-                log.error("Error occurred parsing yaml file", e);
-            } finally {
-                this.directoryService.remove(projectPath);
+                log.error("error occurred parsing yaml file", e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
+
+            this.directoryService.remove(pipelineTempDirPath);
 
             // Respond to GitHub/Wiremock
-            try {
-                final BuildStatus buildStatus = new BuildStatus("success", "build-check", "Pipeline successfully built");
+//            try {
+//                final BuildStatus buildstatus = new BuildStatus("success", "build-check", "pipeline successfully built");
+//
+//                this.pipelineBuildStatusResponder.send(buildstatus, githubEventContext.getBuildCheckUrl());
+//            } catch (PipelineBuildStatusResponderException e) {
+//                log.error("error occurred while building build status", e);
+//            }
 
-                this.pipelineBuildStatusResponder.send(buildStatus, githubEventContext.getBuildCheckUrl());
-            } catch (PipelineBuildStatusResponderException e) {
-                log.error("Error occurred while building build status", e);
-            }
+            log.info("Successfully cloned the repository.");
         };
     }
 

@@ -3,7 +3,7 @@ package org.hali.handler.pullrequest;
 import lombok.extern.slf4j.Slf4j;
 import org.hali.common.fs.DirectoryService;
 import org.hali.common.fs.FileLoader;
-import org.hali.git.GitCommandExecutor;
+import org.hali.git.GitRepositoryCloner;
 import org.hali.handler.AbstractGithubEventContextConsumerHandler;
 import org.hali.pipeline.PipelineMatchingContextBuilder;
 import org.hali.pipeline.PipelineStepExtractor;
@@ -19,7 +19,7 @@ public class PullRequestHandler extends AbstractGithubEventContextConsumerHandle
 
     public PullRequestHandler(
         DirectoryService directoryService,
-        GitCommandExecutor gitCommandExecutor,
+        GitRepositoryCloner gitRepositoryCloner,
         FileLoader fileLoader,
         ResourceLoader resourceLoader,
         YamlParser yamlParser,
@@ -28,6 +28,6 @@ public class PullRequestHandler extends AbstractGithubEventContextConsumerHandle
         PipelineRunner pipelineRunner,
         PipelineBuildStatusResponder pipelineBuildStatusResponder
     ) {
-        super(directoryService, gitCommandExecutor, fileLoader, resourceLoader, yamlParser, pipelineMatchingContextBuilder, pipelineStepExtractor, pipelineRunner, pipelineBuildStatusResponder);
+        super(directoryService, gitRepositoryCloner, fileLoader, resourceLoader, yamlParser, pipelineMatchingContextBuilder, pipelineStepExtractor, pipelineRunner, pipelineBuildStatusResponder);
     }
 }

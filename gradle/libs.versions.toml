@@ -16,6 +16,15 @@ wiremock = "3.13.1"
 test-containers = "1.21.3"
 test-containers-junit = "1.21.3"
 test-containers-git-server = "0.8.0"
+jgit = "7.3.0.202506031305-r"
+jsch = "2.27.2"
+jgit-ssh = "7.3.0.202506031305-r"
+test-containers-opensearch = "3.0.2"
+spring-boot-starter-log4j2 = "3.3.3"
+log4j-layout-template-json = "2.24.1"
+spring-boot-actuator-starter = "3.5.4"
+micrometer-registry-prometheus = "1.15.3"
+tomcat-embed-websocket = "11.0.10"
 
 [libraries]
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
@@ -34,3 +43,12 @@ wiremock-test = { module = "org.wiremock:wiremock", version.ref = "wiremock" }
 test-containers = { module = "org.testcontainers:testcontainers", version.ref = "test-containers" }
 test-container-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "test-containers-junit"}
 test-containers-git-server = { module = "io.github.sparsick.testcontainers.gitserver:testcontainers-gitserver", version.ref = "test-containers-git-server"}
+jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
+jsch = { module = "com.github.mwiede:jsch", version.ref="jsch" }
+jgit-ssh = { module = "org.eclipse.jgit:org.eclipse.jgit.ssh.jsch", version.ref="jgit-ssh" }
+test-containers-opensearch = { module = "org.opensearch:opensearch-testcontainers", version.ref="test-containers-opensearch" }
+spring-boot-starter-log4j2 = { module = "org.springframework.boot:spring-boot-starter-log4j2", version.ref = "spring-boot-starter-log4j2" }
+log4j-layout-template-json = { module = "org.apache.logging.log4j:log4j-layout-template-json", version.ref = "log4j-layout-template-json" }
+spring-boot-actuator-starter = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot-actuator-starter" }
+micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer-registry-prometheus" }
+tomcat-embed-websocket = { module = "org.apache.tomcat.embed:tomcat-embed-websocket", version.ref = "tomcat-embed-websocket" }

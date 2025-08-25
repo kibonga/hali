@@ -1,0 +1,35 @@
+services:
+  opensearch:
+    image: opensearchproject/opensearch:latest
+    ports:
+      - 9200:9200
+    networks:
+      - opensearch-network
+    environment:
+      - "discovery.type=single-node"
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # Set min and max JVM heap sizes to at least 50% of system RAM
+      - "DISABLE_INSTALL_DEMO_CONFIG=true" # Prevents execution of bundled demo script which installs demo certificates and security configurations to OpenSearch
+      - "DISABLE_SECURITY_PLUGIN=true" # Disables Security plugin
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+#      test: ["CMD-SHELL", "curl -k -u admin:MyS3cur3Passw0rd https://localhost:9200 || exit 1"]
+      interval: 10s
+      retries: 10
+
+  opensearch-dashboard:
+    image: opensearchproject/opensearch-dashboards:latest
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
+    environment:
+      - 'OPENSEARCH_HOSTS=["http://opensearch:9200"]'
+      - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=true" # disables security dashboards plugin in OpenSearch Dashboards`
+    networks:
+      - opensearch-network
+    depends_on:
+      opensearch:
+        condition: service_healthy
+
+networks:
+  opensearch-network:

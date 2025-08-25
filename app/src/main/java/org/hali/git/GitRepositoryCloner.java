@@ -5,6 +5,6 @@ import org.hali.exception.CloneRepositoryException;
 
 import java.io.File;
 
-public interface GitCommandExecutor {
-    void clone(GithubEventContext githubEventContext, File workingDir) throws CloneRepositoryException;
+public interface GitRepositoryCloner {
+    void clone(String url, File workingDir) throws CloneRepositoryException;
 }

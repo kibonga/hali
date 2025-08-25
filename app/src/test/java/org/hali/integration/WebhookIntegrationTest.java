@@ -5,17 +5,31 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.sparsick.testcontainers.gitserver.plain.GitServerContainer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.appender.HttpAppender;
+import org.apache.logging.log4j.core.config.AppenderRef;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
+import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opensearch.testcontainers.OpenSearchContainer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
@@ -23,6 +37,7 @@ import org.testcontainers.utility.DockerImageName;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -30,6 +45,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 
 import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class WebhookIntegrationTest {
 
     private static final String WIREMOCK_IMAGE = "wiremock/wiremock:latest";
+    private static final String OPENSEARCH_IMAGE = "opensearchproject/opensearch:2.19.3";
 
     private static final String CONTAINER_REPOS_PATH = "/srv/git";
 
@@ -84,24 +101,35 @@ class WebhookIntegrationTest {
 
     @Container
     private GenericContainer<?> gitServerContainer;
+    @Container
+    private OpenSearchContainer<?> openSearchContainer;
 //    @Container
 //    private final GenericContainer<?> wiremockServer = createWiremockServer();
 
     @BeforeAll
-    void setUp() {
-        final var containerWithGit = createContainerWithGit();
-        containerWithGit.start();
-
-//        final String publicKeyPath = this.sshDirPath + "/" + this.sshPublicKey;
+    void setUp() throws MalformedURLException {
         final String publicKeyPath = getClass().getClassLoader().getResource("keys/id_client.pub").toString();
 
         this.gitServerContainer = createGitServer(this.gitServerDirPath, publicKeyPath);
         this.gitServerContainer.start();
 
-        final String address = this.gitServerContainer.getHost();
-        final int port = this.gitServerContainer.getMappedPort(22);
+        this.openSearchContainer = createOpenSearchContainer();
+        this.openSearchContainer.start();
 
-        log.info("Git server address: {} port: {}", address, port);
+        final String gitServerHost = this.gitServerContainer.getHost();
+        final int gitServerPort = this.gitServerContainer.getMappedPort(22);
+
+        final String openSearchHost = this.openSearchContainer.getHost();
+        final int openSearchPort = this.openSearchContainer.getMappedPort(9200);
+
+        final String openSearchUrl = "http://" + openSearchHost + ":" + openSearchPort + "/logs/_doc";
+//        setupHttpAppender(openSearchUrl);
+        foo(openSearchUrl);
+
+        log.info("Git server address: {} port: {}", gitServerHost, gitServerPort);
+        log.info("OpenSearch host: {} port: {}", openSearchHost, openSearchPort);
+
+        int a = 1;
     }
 
     @Test
@@ -145,11 +173,12 @@ class WebhookIntegrationTest {
 
                 // Assert
                 assertEquals(200, response.statusCode());
+
+                Thread.sleep(Duration.ofSeconds(15));
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     private GitServerContainer createGitServer(final String gitServerDirPath, final String publicKeyPath) {
@@ -173,51 +202,76 @@ class WebhookIntegrationTest {
                     tmpFile.toAbsolutePath().toString(),
                     "/home/git/.ssh/authorized_keys",
                     BindMode.READ_WRITE
-                );
-//            .withFileSystemBind(
-//                publicKeyPath,
-//                CONTAINER_AUTHORIZED_KEYS_PATH,
-//                BindMode.READ_WRITE
-//            );
-//            .withSshKeyAuth();
+                )
+                .withLogConsumer(new Slf4jLogConsumer(log).withPrefix("git-server"));
         } catch (Exception e) {
 
         }
         return null;
     }
 
-//    private static GenericContainer<?> createGitServer(String repoDirPath) {
-//        return new GenericContainer<>(DockerImageName.parse("debian:bullseye-slim"))
-//            .withCreateContainerCmdModifier(cmd -> cmd.withName("gitserver"))
-//            .withNetworkAliases("gitserver")
-//            .withNetwork(sharedNetwork)
-//            .withExposedPorts(9418)
-//            .withFileSystemBind(
-//                repoDirPath,
-//                CONTAINER_BASE_DIR_PATH,
-//                BindMode.READ_WRITE
-//            )
-//            .withLogConsumer(new Consumer<OutputFrame>() {
-//                @Override
-//                public void accept(OutputFrame outputFrame) {
-//                    log.info(outputFrame.getUtf8String());
-//                }
-//            })
-//            .withCommand("sh", "-c",
-//                "apt update && apt install -y git && " +
-//                    "mkdir -p " + CONTAINER_BASE_DIR_PATH + " && " +
-//                    "git daemon --verbose --export-all --enable=receive-pack " +
-//                    "--base-path=" + CONTAINER_BASE_DIR_PATH + " --reuseaddr --listen=" + ALL_HOSTS + " --port=" + GIT_SERVER_DEFAULT_PORT
-//            );
-//    }
+    private OpenSearchContainer<?> createOpenSearchContainer() {
+        return new OpenSearchContainer<>(DockerImageName.parse(OPENSEARCH_IMAGE));
+    }
 
-    private GenericContainer<?> createContainerWithGit() {
-        return new GenericContainer<>(DockerImageName.parse("alpine:latest"))
-            .withCreateContainerCmdModifier(cmd -> cmd.withName("testgit"))
-            .withNetwork(sharedNetwork)
-            .withNetworkAliases("testgit")
-            .withCommand("tail", "-f", "/dev/null")
-            .withExposedPorts();
+    private static void setupHttpAppender(String url) throws MalformedURLException {
+        final LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
+        final Configuration configuration = loggerContext.getConfiguration();
+
+        final HttpAppender httpAppender = HttpAppender.newBuilder()
+            .setName("OpenSearchHttpAppender")
+            .setUrl(URI.create(url).toURL())
+            .setLayout(null)
+            .setMethod("POST")
+            .build();
+
+
+        httpAppender.start();
+        configuration.addAppender(httpAppender);
+
+        final AppenderRef appenderRef = AppenderRef.createAppenderRef("OpenSearchHttpAppender", null, null);
+        final AppenderRef[] appenderRefs = new AppenderRef[] { appenderRef };
+
+        final LoggerConfig loggerConfig = configuration.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+        loggerConfig.addAppender(httpAppender, null, null);
+
+        loggerContext.updateLoggers();
+    }
+
+    private static void foo(String url) {
+        final ConfigurationBuilder<BuiltConfiguration> configurationBuilder = ConfigurationBuilderFactory.newConfigurationBuilder();
+
+        final AppenderComponentBuilder httpAppender = configurationBuilder
+            .newAppender("HTTP", "Http")
+            .addAttribute("url", url)
+            .add(configurationBuilder.newLayout("JsonLayout").addAttribute("compact", true));
+
+        final AppenderComponentBuilder consoleAppender = configurationBuilder
+            .newAppender("Hali Console", "Console")
+            .add(configurationBuilder.newLayout("PatternLayout")
+                .addAttribute("pattern", "%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} KIBONGA:- %msg%n"));
+
+        final Path path = Path.of("");
+
+        final AppenderComponentBuilder fileAppender = configurationBuilder
+            .newAppender("FILE", "File")
+            .addAttribute("fileName", "kibonga-appender.log")
+            .add(configurationBuilder.newLayout("JsonLayout").addAttribute("compact", true));
+
+        final Configuration configuration = configurationBuilder
+            .add(httpAppender)
+            .add(consoleAppender)
+            .add(fileAppender)
+            .add(
+                configurationBuilder.newRootLogger(Level.INFO)
+                    .add(configurationBuilder.newAppenderRef("HTTP"))
+                    .add(configurationBuilder.newAppenderRef("Hali Console"))
+                    .add(configurationBuilder.newAppenderRef("FILE"))
+            )
+            .build(false);
+
+        final LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
+        loggerContext.start(configuration);
     }
 
 //    private GenericContainer<?> createWiremockServer() {
@@ -229,4 +283,5 @@ class WebhookIntegrationTest {
 //               BindMode.READ_WRITE
 //           );
 //    }
+
 }

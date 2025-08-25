@@ -2,7 +2,7 @@ package org.hali.unit.webhook.responder;
 
 import com.sun.net.httpserver.HttpExchange;
 import lombok.SneakyThrows;
-import org.hali.handler.webhook.responder.WebhookResponder;
+import org.hali.handler.webhook.responder.DefaultWebhookResponder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,9 +16,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-class WebhookResponderTest {
+class DefaultWebhookResponderTest {
 
-    private final WebhookResponder webhookResponder = new WebhookResponder();
+    private final DefaultWebhookResponder defaultWebhookResponder = new DefaultWebhookResponder();
 
     // TODO - fix this test
 
@@ -48,7 +48,7 @@ class WebhookResponderTest {
         // Act
         // Assert
         assertThrows(IOException.class,
-            () -> this.webhookResponder.succes(httpExchange, statusCode, responseLength));
+            () -> this.defaultWebhookResponder.succes(httpExchange, statusCode, responseLength));
     }
 
 }

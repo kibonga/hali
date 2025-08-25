@@ -15,6 +15,12 @@ repositories {
   mavenCentral()
 }
 
+configurations.all {
+  exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+  exclude group: 'ch.qos.logback', module: 'logback-classic'
+  exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+}
+
 dependencies {
   // Use JUnit Jupiter for testing.
   testImplementation libs.junit.jupiter
@@ -32,6 +38,10 @@ dependencies {
 
   // Logger
   implementation libs.slf4j
+  implementation libs.spring.boot.starter.log4j2
+  implementation libs.log4j.layout.template.json
+//  implementation libs.log4j.core
+//  testImplementation libs.log4j.core
 
   // Jackson
   implementation libs.jackson.databind
@@ -46,8 +56,12 @@ dependencies {
   testImplementation libs.bytebuddy
 
   // Spring
-  implementation libs.spring.boot.starter
-  implementation libs.spring.boot.starter.test
+  implementation(libs.spring.boot.starter) {
+    exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+  }
+  implementation(libs.spring.boot.starter.test) {
+    exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+  }
 
   // Wiremock
   testImplementation libs.wiremock.test
@@ -56,6 +70,22 @@ dependencies {
   testImplementation libs.test.containers
   testImplementation libs.test.container.junit
   testImplementation libs.test.containers.git.server
+  testImplementation libs.test.containers.opensearch
+
+  // JGit and JSch
+  implementation libs.jgit
+  implementation libs.jsch
+  implementation libs.jgit.ssh
+
+  // Monitoring
+  implementation libs.spring.boot.actuator.starter
+  implementation libs.micrometer.registry.prometheus
+
+  // Tomcat (webserver)
+  implementation libs.tomcat.embed.websocket
+
+  // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web
+  implementation 'org.springframework.boot:spring-boot-starter-web:3.5.4'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

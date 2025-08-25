@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.hali.common.model.GithubEventContext;
 import org.hali.exception.ExtractingException;
 import org.hali.exception.GithubEventContextParsingException;
 import org.hali.functional.ConsumerResolver;
 import org.hali.handler.webhook.parser.GithubEventContextParser;
+import org.hali.handler.webhook.responder.WebhookResponder;
 import org.hali.http.extractor.HeaderExtractor;
 import org.hali.http.responder.HttpExchangeResponder;
 import org.hali.json.JsonExtractor;
@@ -33,6 +35,7 @@ public class WebhookHandler implements HttpHandler {
 
     private final HeaderExtractor headerExtractor;
     private final HttpExchangeResponder httpExchangeResponder;
+    private final WebhookResponder webhookResponder;
     private final ConsumerResolver<GithubEventContext>
         githubEventContextConsumerResolver;
     private final JsonParserResolver<JsonNode, String, GithubEventContext>
@@ -41,6 +44,7 @@ public class WebhookHandler implements HttpHandler {
     @Qualifier("applicationTaskExecutor")
     private final Executor executor;
 
+    @SneakyThrows
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         // Extract and validate GitHub event

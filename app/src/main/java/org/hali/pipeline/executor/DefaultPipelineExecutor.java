@@ -39,6 +39,11 @@ public class DefaultPipelineExecutor implements PipelineExecutor {
         }
     }
 
+    @Override
+    public void cleanUp() throws IOException {
+        this.commandExecutor.cleanUp();
+    }
+
     private static List<String> prepareBashCommandWithExitOnError(String step) {
         return new ArrayList<>(List.of("bash", "-c", "(set -e; " + step + ")"));
     }

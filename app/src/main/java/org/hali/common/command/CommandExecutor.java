@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface CommandExecutor {
     int runCommand(List<String> command, File workingDir) throws IOException, InterruptedException;
+    void cleanUp() throws IOException;
 }

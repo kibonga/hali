@@ -1,17 +1,28 @@
 http-server:
   host: "0.0.0.0"
-  port: 8080
+  port: 8085
 api:
   url-base: ${API_URL_BASE:https://api.github.com/repos}
 github:
   token: ${GITHUB_TOKEN:token123}
 security:
   ssl:
-    enable: true
+    enable: false
     keystores:
       - path: svc_wiremock.jks
         password: password
-  ssh:
-    enabled: ${SECURITY_SSH_ENABLED:false}
-    public-key: classpath:keys/id_client.pub
-    private-key: classpath:keys/id_client
+#  ssh:
+#    enabled: ${SECURITY_SSH_ENABLED:false}
+#    public-key: classpath:keys/id_client.pub
+#    private-key: classpath:keys/id_client
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    enable:
+      all: true
+  endpoint:
+    prometheus:
+      access: unrestricted

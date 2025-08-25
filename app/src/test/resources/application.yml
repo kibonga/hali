@@ -1,6 +1,6 @@
 http-server:
-  host: "0.0.0.0"
-  port: 8080
+  host: "172.16.8.24"
+  port: 8085
 test:
   integration:
     git-server:
@@ -9,8 +9,8 @@ test:
       branch: ${TEST_INTEGRATION_GIT_SERVER_BRANCH:master}
     ssh:
       dir-path: classpath
-      private-key: classpath:kyes/id_client
-      public-key: classpath:kyes/id_client.pub
+      private-key: classpath:keys/id_client
+      public-key: classpath:keys/id_client.pub
     wiremock:
       home-mappings: ${TEST_INTEGRATION_WIREMOCK_HOME_MAPPINGS:/home/pdjurdjic/repos/edu/hali/app/src/test/resources/mappings}
       container-mappings: ${TEST_INTEGRATION_WIREMOCK_CONTAINER_MAPPINGS:/home/wiremock/mappings}
@@ -24,7 +24,18 @@ security:
     keystores:
       - path: svc_wiremock.jks
         password: password
-  ssh:
-    enabled: ${SECURITY_SSH_ENABLED:true}
-    public-key: classpath:id_client.pub
-    private-key: classpath:id_client
+#  ssh:
+#    enabled: ${SECURITY_SSH_ENABLED:true}
+#    public-key: classpath:id_client.pub
+#    private-key: classpath:id_client
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    enable:
+      all: true
+  endpoint:
+    prometheus:
+      access: unrestricted

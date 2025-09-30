@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "urlPathPattern": ".*\\\\\\\\/statuses\\\\\\\\\\\\\\\\/.*"
+    "urlPathPattern": ".*/statuses/.*"
   },
   "response": {
     "status": 200,

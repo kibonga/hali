@@ -80,6 +80,7 @@ dependencies {
   // Monitoring
   implementation libs.spring.boot.actuator.starter
   implementation libs.micrometer.registry.prometheus
+  implementation libs.micrometer.core
 
   // Tomcat (webserver)
   implementation libs.tomcat.embed.websocket

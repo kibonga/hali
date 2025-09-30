@@ -1,5 +1,7 @@
 package org.hali.functional;
 
+import java.util.Optional;
+
 public interface ParserResolver<T, R, C> {
-   Parser<T, R, C> resolve(String type);
+   Optional<Parser<T, R, C>> resolve(String type);
 }

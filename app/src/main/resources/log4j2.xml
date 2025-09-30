@@ -2,11 +2,27 @@
 <Configuration status="INFO">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n - %X - %K"/>
+            <JsonLayout complete="false" compact="true" eventEol="true" properties="true"  />
         </Console>
         <Http name="HTTP" url="http://localhost:9200/logs/_doc" ignoreExceptions="true">
             <JsonLayout compact="true"/>
             <SslConfig verifyHostnames="false"/>
+        </Http>
+        <Http name="OpenSearchAppender"
+              url="https://localhost:9200/hali/_doc"
+              method="POST"
+              verifyHostName="false"
+              ignoreExceptions="true">
+            <Property name="Content-Type" value="application/json"/>
+            <Property name="Authorization" value="Basic YWRtaW46U3VwZXJTM2NyM3RQYXNzd29yZCExMjM"/>
+            <JsonLayout complete="false" compact="true" eventEol="true" properties="true">
+                <KeyValuePair key="timestamp" value="$${date:yyyy-MM-dd'T'HH:mm:ss.SSSZ}" />
+            </JsonLayout>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n - %X - %K"/>
+            <Ssl>
+                <TrustStore location="/home/pdjurdjic/repos/edu/open-cert/opensearch-truststore.jks" password="changeit"/>
+            </Ssl>
         </Http>
         <File name="FILE" fileName="${env:LOG_FILE_PATH}/hali-file-appender.log">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
@@ -15,8 +31,9 @@
     <Loggers>
         <Root level="info">
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="HTTP"/>
-            <AppenderRef ref="FILE"/>
+<!--            <AppenderRef ref="HTTP"/>-->
+<!--            <AppenderRef ref="FILE"/>-->
+            <AppenderRef ref="OpenSearchAppender"/>
         </Root>
     </Loggers>
 </Configuration>

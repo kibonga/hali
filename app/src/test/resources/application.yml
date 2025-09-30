@@ -1,6 +1,3 @@
-http-server:
-  host: "172.16.8.24"
-  port: 8085
 test:
   integration:
     git-server:
@@ -17,7 +14,7 @@ test:
   wiremock:
     port: 4201
 api:
-  url-base: ${API_URL_BASE:http://localhost:8080/repos/}
+  url-base: ${API_URL_BASE:http://localhost:8080/repos}
 security:
   ssl:
     enable: true
@@ -29,6 +26,8 @@ security:
 #    public-key: classpath:id_client.pub
 #    private-key: classpath:id_client
 management:
+  server:
+    port: 0
   endpoints:
     web:
       exposure:

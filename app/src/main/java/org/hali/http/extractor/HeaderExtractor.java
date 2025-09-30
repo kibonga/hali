@@ -1,8 +1,9 @@
 package org.hali.http.extractor;
 
-import com.sun.net.httpserver.Headers;
+import java.util.Map;
+import java.util.Optional;
 
 public interface HeaderExtractor {
 
-    String extract(Headers headers, String name);
+    Optional<String> extract(Map<String, String> headers, String name);
 }

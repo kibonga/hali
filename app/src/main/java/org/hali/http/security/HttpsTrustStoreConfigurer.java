@@ -1,6 +1,6 @@
 package org.hali.http.security;
 
-import org.hali.App;
+//import org.hali.App;
 import org.hali.resource.ResourceLoader;
 import org.hali.security.ssl.KeyStoreFactory;
 import org.hali.security.ssl.SslContextFactory;

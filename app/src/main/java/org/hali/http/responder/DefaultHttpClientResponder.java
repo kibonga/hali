@@ -29,7 +29,7 @@ public abstract class DefaultHttpClientResponder implements HttpClientResponder 
         try {
             final var response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
-            log.info("Successfully received HTTP response. Status: {}, Body length: {}", response.statusCode(), response.body().length());
+            log.info("Successfully received HTTP response. Status: {}, Body length: {}", response.statusCode(), response.body());
         } catch (IOException e) {
             throw new HttpClientResponderException("An error occurred while sending the HTTP request", e);
         } catch (InterruptedException e) {

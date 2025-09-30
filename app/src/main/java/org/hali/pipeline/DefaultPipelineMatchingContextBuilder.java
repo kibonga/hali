@@ -1,7 +1,7 @@
 package org.hali.pipeline;
 
 import lombok.RequiredArgsConstructor;
-import org.hali.common.model.GithubEventContext;
+import org.hali.handler.webhook.domain.WebhookContext;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,10 +12,10 @@ public class DefaultPipelineMatchingContextBuilder implements PipelineMatchingCo
     private final PipelineRefPatternResolver pipelineRefPatternResolver;
 
     @Override
-    public PipelineMatchingContext build(GithubEventContext githubEventContext) {
-       return new PipelineMatchingContext(
-           this.pipelineTriggerTypeResolver.resolve(githubEventContext.getEventType()),
-           this.pipelineRefPatternResolver.resolve(githubEventContext)
-       );
+    public PipelineMatchingContext build(WebhookContext webhookContext) {
+        return new PipelineMatchingContext(
+            this.pipelineTriggerTypeResolver.resolve(webhookContext.getEventType()),
+            this.pipelineRefPatternResolver.resolve(webhookContext)
+        );
     }
 }

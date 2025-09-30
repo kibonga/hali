@@ -1,6 +1,6 @@
 package org.hali.pipeline;
 
-import org.hali.common.model.GithubEventContext;
+import org.hali.handler.webhook.domain.WebhookContext;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -17,8 +17,8 @@ public class DefaultPipelineRefPatternResolver implements PipelineRefPatternReso
     );
 
     @Override
-    public PipelineRefPattern resolve(GithubEventContext githubEventContext) {
-        final String branch = githubEventContext.getBranch();
+    public PipelineRefPattern resolve(WebhookContext webhookContext) {
+        final String branch = webhookContext.getBranch();
         final String refType = branch.contains("/") ? branch.substring(0, branch.lastIndexOf('/')) : branch;
 
         return PIPELINE_REF_PATTERNS.getOrDefault(refType, DEFAULT_PIPELINE_REF_PATTERN);

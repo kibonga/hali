@@ -1,7 +1,7 @@
 package org.hali.pipeline;
 
-import org.hali.common.model.GithubEventContext;
+import org.hali.handler.webhook.domain.WebhookContext;
 
 public interface PipelineMatchingContextBuilder {
-    PipelineMatchingContext build(GithubEventContext githubEventContext);
+    PipelineMatchingContext build(WebhookContext webhookContext);
 }

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Appenders>
+        <Console name="Integration-test-console-appender" target="SYSTEM_OUT">
+            <PatternLayout
+                pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n - %X - %K"/>
+            <JsonLayout complete="false" compact="true" eventEol="true"
+                        properties="true"/>
+        </Console>
+        <File name="Integration-test-file-appender"
+              fileName="./logs/integration-test-pipeline-file-appender.log">
+            <PatternLayout
+                pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Integration-test-console-appender"/>
+            <AppenderRef ref="Integration-test-file-appender"/>
+        </Root>
+    </Loggers>
+</Configuration>

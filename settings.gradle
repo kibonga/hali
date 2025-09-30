@@ -12,3 +12,5 @@ plugins {
 
 rootProject.name = 'hali'
 include('app')
+include 'app:src:integration-tests'
+findProject(':app:src:integration-tests')?.name = 'integration-tests'

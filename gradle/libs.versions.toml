@@ -24,6 +24,7 @@ spring-boot-starter-log4j2 = "3.3.3"
 log4j-layout-template-json = "2.24.1"
 spring-boot-actuator-starter = "3.5.4"
 micrometer-registry-prometheus = "1.15.3"
+micrometer-core = "1.15.4"
 tomcat-embed-websocket = "11.0.10"
 
 [libraries]
@@ -51,4 +52,5 @@ spring-boot-starter-log4j2 = { module = "org.springframework.boot:spring-boot-st
 log4j-layout-template-json = { module = "org.apache.logging.log4j:log4j-layout-template-json", version.ref = "log4j-layout-template-json" }
 spring-boot-actuator-starter = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot-actuator-starter" }
 micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer-registry-prometheus" }
+micrometer-core = { module = "io.micrometer:micrometer-core", version.ref = "micrometer-core"}
 tomcat-embed-websocket = { module = "org.apache.tomcat.embed:tomcat-embed-websocket", version.ref = "tomcat-embed-websocket" }

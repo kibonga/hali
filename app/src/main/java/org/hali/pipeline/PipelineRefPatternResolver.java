@@ -1,7 +1,7 @@
 package org.hali.pipeline;
 
-import org.hali.common.model.GithubEventContext;
+import org.hali.handler.webhook.domain.WebhookContext;
 
 public interface PipelineRefPatternResolver {
-    PipelineRefPattern resolve(GithubEventContext githubEventContext);
+    PipelineRefPattern resolve(WebhookContext webhookContext);
 }

@@ -1,5 +1,7 @@
 package org.hali.functional;
 
+import java.util.Optional;
+
 public interface Resolver<T> {
-    T resolve(String type);
+    Optional<T> resolve(String type);
 }

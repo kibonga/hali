@@ -27,6 +27,7 @@ public class PipelineCommandExecutor extends AbstractCommandExecutor {
 
     @Override
     protected void handleOutput(String line) throws IOException {
+        log.info(line);
         Files.writeString(this.rawPipelineOutputPath, line + System.lineSeparator(), StandardOpenOption.APPEND);
     }
 

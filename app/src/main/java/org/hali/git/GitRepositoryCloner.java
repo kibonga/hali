@@ -1,6 +1,5 @@
 package org.hali.git;
 
-import org.hali.common.model.GithubEventContext;
 import org.hali.exception.CloneRepositoryException;
 
 import java.io.File;

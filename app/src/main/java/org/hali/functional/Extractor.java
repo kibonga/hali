@@ -1,7 +1,7 @@
 package org.hali.functional;
 
-import org.hali.exception.ExtractingException;
+import java.util.Optional;
 
 public interface Extractor<I, O> {
-    O extract(I input) throws ExtractingException;
+    Optional<O> extract(I input);
 }

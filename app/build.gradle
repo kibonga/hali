@@ -50,7 +50,7 @@ dependencies {
   // Snakeyaml
   implementation libs.snakeyaml
 
-  // Mockito:
+  // Mockito
   testImplementation libs.mockito.core
   testImplementation libs.mockito.junit.jupiter
   testImplementation libs.bytebuddy
@@ -103,10 +103,34 @@ test {
 
 application {
   // Define the main class for the application.
-  mainClass = 'org.hali.App'
+  mainClass = 'org.hali.HaliApplication'
 }
 
 tasks.named('test') {
   // Use JUnit Platform for unit tests.
+  useJUnitPlatform()
+}
+
+sourceSets {
+  integrationTest {
+    java.srcDirs = ['src/integrationTest', 'src/integrationTest/java']
+    compileClasspath += sourceSets.main.output + sourceSets.test.output
+    runtimeClasspath += output + compileClasspath
+  }
+}
+
+configurations {
+  integrationTestImplementation.extendsFrom(testImplementation)
+  integrationTestRuntimeOnly.extendsFrom(testRuntimeOnly)
+  integrationTestCompileOnly.extendsFrom(testCompileOnly)
+  integrationTestAnnotationProcessor.extendsFrom(testAnnotationProcessor)
+}
+
+tasks.register("integrationTest", Test) {
+  description = 'Runs the integration tests'
+  group = 'verification'
+  testClassesDirs = sourceSets.integrationTest.output.classesDirs
+  classpath = sourceSets.integrationTest.runtimeClasspath
+  shouldRunAfter test
   useJUnitPlatform()
 }

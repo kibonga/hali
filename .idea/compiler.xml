@@ -9,6 +9,7 @@
         </processorPath>
         <module name="hali.app.main" />
         <module name="hali.app.test" />
+        <module name="hali.app.integrationTest" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="21" />

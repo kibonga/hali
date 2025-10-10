@@ -1,4 +1,4 @@
-package org.hali.unit.webhook.resolver;
+package org.hali.webhook.resolver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;

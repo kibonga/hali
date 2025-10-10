@@ -48,7 +48,7 @@ import static org.hali.handler.event.logging.GitEventHandlerStep.WEBHOOK_RESPONS
 @Log4j2
 @SuppressWarnings("unchecked")
 public abstract class GitEventHandler implements ConsumerHandler<WebhookContext> {
-    private static final String PIPELINE_YAML = "pipeline.yml";
+    private static final String PIPELINE_YML = "pipeline.yml";
 
     private final DirectoryService directoryService;
     private final GitRepositoryCloner gitRepositoryCloner;
@@ -132,7 +132,7 @@ public abstract class GitEventHandler implements ConsumerHandler<WebhookContext>
     }
 
     private static Path resolvePipelineYamlPath(Path repoDir) {
-        return Path.of(repoDir.toString(), PIPELINE_YAML);
+        return Path.of(repoDir.toString(), PIPELINE_YML);
     }
 
     private StringMapMessage getEventHandlerLog(GitEventHandlerStep step, String projectName) {

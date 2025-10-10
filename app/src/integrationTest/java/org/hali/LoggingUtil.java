@@ -1,4 +1,4 @@
-package org.hali.integration;
+package org.hali;
 
 import lombok.experimental.UtilityClass;
 import org.apache.logging.log4j.Level;

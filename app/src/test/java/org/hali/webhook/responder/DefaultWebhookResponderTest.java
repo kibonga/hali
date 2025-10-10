@@ -1,4 +1,4 @@
-package org.hali.unit.webhook.responder;
+package org.hali.webhook.responder;
 
 import com.sun.net.httpserver.HttpExchange;
 import lombok.SneakyThrows;

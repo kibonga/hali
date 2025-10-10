@@ -1,4 +1,4 @@
-package org.hali.unit;
+package org.hali;
 
 public class YamlParsingTest {
 

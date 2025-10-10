@@ -1,9 +1,10 @@
-package org.hali.integration;
+package org.hali;
 
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.sparsick.testcontainers.gitserver.plain.GitServerContainer;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.hali.util.ResourceLoader;
 import org.opensearch.testcontainers.OpenSearchContainer;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
@@ -13,56 +14,46 @@ import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import static org.hali.integration.ContainerInfoConsts.GIT_SERVER_GIT_SRV;
-import static org.hali.integration.ContainerInfoConsts.GIT_SERVER_PORT;
-import static org.hali.integration.ContainerInfoConsts.OPENSEARCH_IMAGE;
-import static org.hali.integration.ContainerInfoConsts.WIREMOCK_IMAGE;
-import static org.hali.integration.ContainerInfoConsts.WIREMOCK_PORT;
 
 @UtilityClass
 @Slf4j
 public class ContainerFactory {
 
-    public GitServerContainer createGitServer(final String gitServerDirPath, final String publicKeyPath) {
+    private static final String PUBLIC_KEY_PATH = "keys/id_client.pub";
 
-        try (final InputStream is = ContainerFactory.class.getClassLoader().getResourceAsStream("keys/id_client.pub")) {
-            final String publicKey = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-            final Path tmpFile = Files.createTempFile("authorized_keys", ".tmp");
-            Files.writeString(tmpFile, publicKey);
+    public GitServerContainer createGitServer(final String gitServerDirPath) throws IOException {
 
-            return new GitServerContainer(DockerImageName.parse("rockstorm/git-server:2.38"))
-                .withNetwork(Network.SHARED)
-                .withNetworkAliases("gitserver")
-                .withCreateContainerCmdModifier(cmd -> cmd.withName("gitserver"))
-                .withExposedPorts(GIT_SERVER_PORT)
-                .withFileSystemBind(
-                    gitServerDirPath,
-                    GIT_SERVER_GIT_SRV,
-                    BindMode.READ_WRITE
-                )
-                .withFileSystemBind(
-                    tmpFile.toAbsolutePath().toString(),
-                    "/home/git/.ssh/authorized_keys",
-                    BindMode.READ_WRITE
-                )
-                .withLogConsumer(new Slf4jLogConsumer(log).withPrefix("git-server"));
-        } catch (Exception e) {
+        final String publicKey = ResourceLoader.readResourcesAsString(ContainerFactory.class, PUBLIC_KEY_PATH);
 
-        }
-        return null;
+        final Path tmpFile = Files.createTempFile("authorized_keys", ".tmp");
+        Files.writeString(tmpFile, publicKey);
+
+        return new GitServerContainer(DockerImageName.parse("rockstorm/git-server:2.38"))
+            .withNetwork(Network.SHARED)
+            .withNetworkAliases("gitserver")
+            .withCreateContainerCmdModifier(cmd -> cmd.withName("gitserver"))
+            .withExposedPorts(ContainerInfoConsts.GIT_SERVER_PORT)
+            .withFileSystemBind(
+                gitServerDirPath,
+                ContainerInfoConsts.GIT_SERVER_GIT_SRV,
+                BindMode.READ_WRITE
+            )
+            .withFileSystemBind(
+                tmpFile.toAbsolutePath().toString(),
+                "/home/git/.ssh/authorized_keys",
+                BindMode.READ_WRITE
+            )
+            .withLogConsumer(new Slf4jLogConsumer(log).withPrefix("git-server"));
     }
 
     public GenericContainer<?> createWiremockServer(String hostMappingsPath, String containerMappingsPath) {
-        return new GenericContainer<>(DockerImageName.parse(WIREMOCK_IMAGE))
+        return new GenericContainer<>(DockerImageName.parse(ContainerInfoConsts.WIREMOCK_IMAGE))
             .withNetwork(Network.SHARED)
             .withNetworkAliases("wiremock")
             .withCreateContainerCmdModifier(cmd -> cmd.withName("wiremock"))
-            .withExposedPorts(WIREMOCK_PORT)
+            .withExposedPorts(ContainerInfoConsts.WIREMOCK_PORT)
             .withFileSystemBind(
                 hostMappingsPath,
                 containerMappingsPath,
@@ -72,7 +63,7 @@ public class ContainerFactory {
     }
 
     public OpenSearchContainer<?> createOpenSearchContainer() {
-        return new OpenSearchContainer<>(DockerImageName.parse(OPENSEARCH_IMAGE))
+        return new OpenSearchContainer<>(DockerImageName.parse(ContainerInfoConsts.OPENSEARCH_IMAGE))
             .withNetworkAliases("opensearch")
             .withCreateContainerCmdModifier(cmd -> cmd.withName("opensearch"));
     }

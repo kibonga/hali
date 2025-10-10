@@ -12,8 +12,9 @@ import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.ssh.jsch.JschConfigSessionFactory;
 import org.eclipse.jgit.transport.ssh.jsch.OpenSshConfig;
 import org.eclipse.jgit.util.FS;
+import org.hali.HaliApplication;
 import org.hali.exception.CloneRepositoryException;
-import org.springframework.beans.factory.annotation.Value;
+import org.hali.resource.ResourceLoaderUtil;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -54,14 +55,15 @@ public class JGitRepositoryCloner implements GitRepositoryCloner {
                 final JSch defaultJSch = super.createDefaultJSch(fs);
                 defaultJSch.removeAllIdentity();
 
-                final String privateKeyPath;
+                final String privateKey;
                 try {
-                    privateKeyPath = new File(getClass().getClassLoader().getResource("keys/id_client").toURI()).getAbsolutePath();
+                    privateKey = new File(ResourceLoaderUtil.getResource(HaliApplication.class, "keys/id_client").toURI()).getAbsolutePath();
                 } catch (URISyntaxException e) {
-                    // TODO: add exception handling
+                    log.error("Error getting id_client", e);
                     throw new RuntimeException(e);
                 }
-                defaultJSch.addIdentity(privateKeyPath);
+
+                defaultJSch.addIdentity(privateKey);
 
                 return defaultJSch;
             }

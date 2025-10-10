@@ -32,11 +32,11 @@ public class HaliApplication implements CommandLineRunner {
 
         log.info("Application running on {}:{}", address, port);
 
-//        if (this.trustStoreProperties.isEnable()) {
-//            log.info("Setting up trust store");
-//            // This is enabled for e2e test, we are using Wiremock (as a server) so we need to define trust store
-//            // Our app is going to "trust" the remote "wiremock server" in e2e test
-//            this.trustStoreConfigurer.setupTrustStore(this.trustStoreProperties.getKeyStores());
-//        }
+        if (this.trustStoreProperties.isEnable()) {
+            log.info("Setting up trust store");
+            // This is enabled for e2e test, we are using Wiremock (as a server) so we need to define trust store
+            // Our app is going to "trust" the remote "wiremock server" in e2e test
+            this.trustStoreConfigurer.setupTrustStore(this.trustStoreProperties.getKeyStores());
+        }
     }
 }

@@ -1,4 +1,4 @@
-package org.hali.integration;
+package org.hali;
 
 public final class ContainerInfoConsts {
     private ContainerInfoConsts() {

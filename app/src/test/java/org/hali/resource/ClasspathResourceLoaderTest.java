@@ -1,4 +1,4 @@
-package org.hali.unit.resource;
+package org.hali.resource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.io.InputStream;
 import lombok.SneakyThrows;
 import org.hali.exception.ClasspathResourceLoadingException;
-import org.hali.resource.ClasspathResourceLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

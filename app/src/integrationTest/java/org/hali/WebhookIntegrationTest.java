@@ -1,4 +1,4 @@
-package org.hali.integration;
+package org.hali;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,12 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -29,19 +27,15 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Objects;
 
 import static java.util.Objects.nonNull;
-import static org.hali.integration.ContainerInfoConsts.GIT_SERVER_PORT;
-import static org.hali.integration.ContainerInfoConsts.WEBHOOK_PULL_REQUEST_JSON;
-import static org.hali.integration.ContainerInfoConsts.WIREMOCK_PORT;
-import static org.hali.integration.ContainerInfoConsts.getWebhookHandlerPipelineUrl;
 
 @Slf4j
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("integration-test")
 class WebhookIntegrationTest {
 
     @LocalServerPort
@@ -95,11 +89,9 @@ class WebhookIntegrationTest {
 //
 //
     @BeforeAll
-    void setUp() {
-        final String publicKeyPath = Objects.requireNonNull(getClass().getClassLoader().getResource("keys/id_client.pub")).toString();
-
+    void setUp() throws IOException {
         // Start Git server
-        this.gitServerContainer = ContainerFactory.createGitServer(this.gitServerDirPath, publicKeyPath);
+        this.gitServerContainer = ContainerFactory.createGitServer(this.gitServerDirPath);
         Assertions.assertNotNull(this.gitServerContainer);
         this.gitServerContainer.start();
 
@@ -112,7 +104,7 @@ class WebhookIntegrationTest {
         final int gitServerPort = this.gitServerContainer.getMappedPort(22);
 
         final String wiremockHost = this.wiremockServer.getHost();
-        final int wiremockPort = this.wiremockServer.getMappedPort(WIREMOCK_PORT);
+        final int wiremockPort = this.wiremockServer.getMappedPort(ContainerInfoConsts.WIREMOCK_PORT);
 
         // Set api.url-base property from application.yml as env variable
         final var apiUrlBase = "http://localhost:" + wiremockPort + "/statuses/";
@@ -124,9 +116,9 @@ class WebhookIntegrationTest {
 
     @Test
     void webhook_pullRequest() throws IOException {
-        try (final InputStream is = getClass().getClassLoader().getResourceAsStream(WEBHOOK_PULL_REQUEST_JSON)) {
+        try (final InputStream is = getClass().getClassLoader().getResourceAsStream(ContainerInfoConsts.WEBHOOK_PULL_REQUEST_JSON)) {
             if (!nonNull(is))
-                throw new FileNotFoundException(WEBHOOK_PULL_REQUEST_JSON);
+                throw new FileNotFoundException(ContainerInfoConsts.WEBHOOK_PULL_REQUEST_JSON);
 
             final var objectMapper = new ObjectMapper();
             final String payload = new String(is.readAllBytes(), StandardCharsets.UTF_8);
@@ -143,7 +135,7 @@ class WebhookIntegrationTest {
             final HttpRequest request = HttpRequest.newBuilder()
                 .header("Content-Type", "application/json")
                 .header("X-Github-Event", "pull_request")
-                .uri(URI.create(getWebhookHandlerPipelineUrl(this.localServerPort)))
+                .uri(URI.create(ContainerInfoConsts.getWebhookHandlerPipelineUrl(this.localServerPort)))
                 .POST(HttpRequest.BodyPublishers.ofString(updatedPayload))
                 .build();
 
@@ -165,7 +157,7 @@ class WebhookIntegrationTest {
 
     private String getCloneUrl() {
         final String host = this.gitServerContainer.getHost();
-        final Integer port = this.gitServerContainer.getMappedPort(GIT_SERVER_PORT);
+        final Integer port = this.gitServerContainer.getMappedPort(ContainerInfoConsts.GIT_SERVER_PORT);
 
         return "ssh://git@" + host + ":" + port + "/srv/git/" + this.gitServerRepoName;
     }

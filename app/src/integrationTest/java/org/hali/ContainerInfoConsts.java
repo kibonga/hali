@@ -5,6 +5,7 @@ public final class ContainerInfoConsts {
     }
 
     public static final int WIREMOCK_PORT = 8080;
+    public static final int WIREMOCK_PORT_HTTPS = 8443;
     public static final int GIT_SERVER_PORT = 22;
 
     public static final String WIREMOCK_IMAGE = "wiremock/wiremock:latest";
@@ -19,8 +20,8 @@ public final class ContainerInfoConsts {
 
     public static final String WEBHOOK_HANDLER_PIPELINE = "http://localhost:8080/webhook/handler/pipeline";
 
-    public static final String WEBHOOK_PULL_REQUEST_JSON = "integration_webhook_pull_request.json";
-    public static final String WEBHOOK_PUSH_REQUEST_JSON = "integration_webhook_push.json";
+    public static final String DATA_INTEGRATION_WEBHOOK_PULL_REQUEST_JSON = "data/integration_webhook_pull_request.json";
+    public static final String DATA_INTEGRATION_WEBHOOK_PUSH_JSON = "data/integration_webhook_push.json";
 
     public static String getWebhookHandlerPipelineUrl(Integer port) {
         return String.format("http://%s:%d/webhook/handler/pipeline", LOCALHOST, port);

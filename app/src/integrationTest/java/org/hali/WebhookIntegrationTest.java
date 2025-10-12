@@ -4,13 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
+import org.hali.resource.ResourceLoaderUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
@@ -18,17 +19,17 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
-import static java.util.Objects.nonNull;
+import static org.hali.ContainerInfoConsts.DATA_INTEGRATION_WEBHOOK_PULL_REQUEST_JSON;
+import static org.hali.ContainerInfoConsts.GIT_SERVER_PORT;
+import static org.hali.ContainerInfoConsts.WIREMOCK_PORT;
+import static org.hali.ContainerInfoConsts.WIREMOCK_PORT_HTTPS;
 
 @Slf4j
 @Testcontainers
@@ -36,10 +37,14 @@ import static java.util.Objects.nonNull;
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("integration-test")
-class WebhookIntegrationTest {
+public class WebhookIntegrationTest {
 
     @LocalServerPort
     private int localServerPort;
+
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
+    private IntegrationTestConfigurationProperties props;
 
     /**
      * SSH values are commented out because integration tests do not use SSH.
@@ -51,19 +56,19 @@ class WebhookIntegrationTest {
 //    @Value("${test.integration.ssh.public-key}")
 //    private String sshPublicKey;
 
-    @Value("${test.integration.git-server.dir-path}")
+//    @Value("${git-server.dir-path}")
     private String gitServerDirPath;
 
-    @Value("${test.integration.git-server.repo-name}")
+    //    @Value("${test.integration.git-server.repo-name}")
     private String gitServerRepoName;
 
-    @Value("${test.integration.git-server.branch}")
+    //    @Value("${test.integration.git-server.branch}")
     private String gitServerBranchName;
 
-    @Value("${test.integration.wiremock.home-mappings}")
+    //    @Value("${test.integration.wiremock.home-mappings}")
     private String wiremockHostMappingsPath;
 
-    @Value("${test.integration.wiremock.container-mappings}")
+    //    @Value("${test.integration.wiremock.container-mappings}")
     private String wiremockContainerMappingsPath;
 
     @Container
@@ -91,23 +96,23 @@ class WebhookIntegrationTest {
     @BeforeAll
     void setUp() throws IOException {
         // Start Git server
-        this.gitServerContainer = ContainerFactory.createGitServer(this.gitServerDirPath);
+        this.gitServerContainer = ContainerFactory.createGitServer(this.props.gitServer());
         Assertions.assertNotNull(this.gitServerContainer);
         this.gitServerContainer.start();
 
         // Start Wiremock server
-        this.wiremockServer = ContainerFactory.createWiremockServer(this.wiremockHostMappingsPath, this.wiremockContainerMappingsPath);
+        this.wiremockServer = ContainerFactory.createWiremockServer(this.props.wiremock());
         Assertions.assertNotNull(this.wiremockServer);
         this.wiremockServer.start();
 
         final String gitServerHost = this.gitServerContainer.getHost();
-        final int gitServerPort = this.gitServerContainer.getMappedPort(22);
+        final int gitServerPort = this.gitServerContainer.getMappedPort(GIT_SERVER_PORT);
 
         final String wiremockHost = this.wiremockServer.getHost();
-        final int wiremockPort = this.wiremockServer.getMappedPort(ContainerInfoConsts.WIREMOCK_PORT);
+        final int wiremockPort = this.wiremockServer.getMappedPort(WIREMOCK_PORT_HTTPS);
 
         // Set api.url-base property from application.yml as env variable
-        final var apiUrlBase = "http://localhost:" + wiremockPort + "/statuses/";
+        final var apiUrlBase = "https://localhost:" + wiremockPort + "/statuses/";
         System.setProperty("api.url-base", apiUrlBase);
 
         log.info("Git server host: {} port: {}", gitServerHost, gitServerPort);
@@ -115,50 +120,41 @@ class WebhookIntegrationTest {
     }
 
     @Test
-    void webhook_pullRequest() throws IOException {
-        try (final InputStream is = getClass().getClassLoader().getResourceAsStream(ContainerInfoConsts.WEBHOOK_PULL_REQUEST_JSON)) {
-            if (!nonNull(is))
-                throw new FileNotFoundException(ContainerInfoConsts.WEBHOOK_PULL_REQUEST_JSON);
+    void webhook_pullRequest() throws IOException, InterruptedException {
+        final String webhookPullRequestPayload = ResourceLoaderUtil.getResourceAsString(WebhookIntegrationTest.class, DATA_INTEGRATION_WEBHOOK_PULL_REQUEST_JSON);
+        final var objectMapper = new ObjectMapper();
 
-            final var objectMapper = new ObjectMapper();
-            final String payload = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        final JsonNode node = objectMapper.readTree(webhookPullRequestPayload);
 
-            final JsonNode node = objectMapper.readTree(payload);
+        ((ObjectNode) node.get("repository")).put("clone_url", getCloneUrl());
+        ((ObjectNode) node.at("/pull_request/head")).put("ref", this.gitServerBranchName);
+        ((ObjectNode) node.at("/repository")).put("full_name", "kibonga-upstream-repo.git");
+        ((ObjectNode) node.at("/repository")).put("name", "kibonga-upstream-repo");
 
-            ((ObjectNode) node.get("repository")).put("clone_url", getCloneUrl());
-            ((ObjectNode) node.at("/pull_request/head")).put("ref", this.gitServerBranchName);
-            ((ObjectNode) node.at("/repository")).put("full_name", "kibonga-upstream-repo.git");
-            ((ObjectNode) node.at("/repository")).put("name", "kibonga-upstream-repo");
+        final String updatedPayload = objectMapper.writeValueAsString(node);
 
-            final String updatedPayload = objectMapper.writeValueAsString(node);
+        final HttpRequest request = HttpRequest.newBuilder()
+            .header("Content-Type", "application/json")
+            .header("X-Github-Event", "pull_request")
+            .uri(URI.create(ContainerInfoConsts.getWebhookHandlerPipelineUrl(this.localServerPort)))
+            .POST(HttpRequest.BodyPublishers.ofString(updatedPayload))
+            .build();
 
-            final HttpRequest request = HttpRequest.newBuilder()
-                .header("Content-Type", "application/json")
-                .header("X-Github-Event", "pull_request")
-                .uri(URI.create(ContainerInfoConsts.getWebhookHandlerPipelineUrl(this.localServerPort)))
-                .POST(HttpRequest.BodyPublishers.ofString(updatedPayload))
-                .build();
+        try (final HttpClient client = HttpClient.newHttpClient()) {
+            final var response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            try (final HttpClient client = HttpClient.newHttpClient()) {
-                final var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            Assertions.assertEquals(200, response.statusCode());
 
-                Assertions.assertEquals(200, response.statusCode());
-
-                // Quick workaround: integration test runs in a separate thread/process and requires additional containers.
-                // Sleep is used here to give them time to start up.
-                Thread.sleep(Duration.ofSeconds(15));
-
-
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            // Quick workaround: integration test runs in a separate thread/process and requires additional containers.
+            // Sleep is used here to give them time to start up.
+            Thread.sleep(Duration.ofSeconds(15));
         }
     }
 
     private String getCloneUrl() {
         final String host = this.gitServerContainer.getHost();
-        final Integer port = this.gitServerContainer.getMappedPort(ContainerInfoConsts.GIT_SERVER_PORT);
+        final Integer port = this.gitServerContainer.getMappedPort(GIT_SERVER_PORT);
 
-        return "ssh://git@" + host + ":" + port + "/srv/git/" + this.gitServerRepoName;
+        return "ssh://git@" + host + ":" + port + "/srv/git/" + this.props.gitServer().repo().name();
     }
 }

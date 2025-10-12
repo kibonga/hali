@@ -2,16 +2,7 @@ api:
   url-base: ${API_URL_BASE:https://api.github.com/repos}
 github:
   token: ${GITHUB_TOKEN:token123}
-security:
-  ssl:
-    enable: false
-    keystores:
-      - path: svc_wiremock.jks
-        password: password
-#  ssh:
-#    enabled: ${SECURITY_SSH_ENABLED:false}
-#    public-key: classpath:keys/id_client.pub
-#    private-key: classpath:keys/id_client
+
 management:
   server:
     port: 9075
@@ -25,3 +16,10 @@ management:
   endpoint:
     prometheus:
       access: unrestricted
+
+# Security
+security:
+  # SSL
+  tls:
+    enabled: false
+    keystores: []

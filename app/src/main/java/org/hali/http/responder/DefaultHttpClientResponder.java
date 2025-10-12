@@ -15,10 +15,10 @@ import java.net.http.HttpResponse;
 @Slf4j
 public abstract class DefaultHttpClientResponder implements HttpClientResponder {
 
-    private static final HttpClient httpClient = HttpClient.newHttpClient();
+    private final HttpClient httpClient;
 
     @Override
-    public void send(HttpResponseContext httpResponseContext) throws IOException, URISyntaxException, HttpClientResponderException {
+    public void send(HttpResponseContext httpResponseContext) throws HttpClientResponderException {
 
         final HttpRequest httpRequest = HttpRequest.newBuilder()
             .header("Content-Type", "application/json")
@@ -27,7 +27,7 @@ public abstract class DefaultHttpClientResponder implements HttpClientResponder 
             .build();
 
         try {
-            final var response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            final var response = this.httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
             log.info("Successfully received HTTP response. Status: {}, Body length: {}", response.statusCode(), response.body());
         } catch (IOException e) {

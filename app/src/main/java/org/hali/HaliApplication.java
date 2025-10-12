@@ -5,8 +5,7 @@ package org.hali;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.hali.security.ssl.TrustStoreConfigurer;
-import org.hali.security.ssl.TrustStoreProperties;
+import org.hali.security.TrustStoreProperties;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,7 +16,6 @@ import org.springframework.core.env.Environment;
 @RequiredArgsConstructor
 public class HaliApplication implements CommandLineRunner {
 
-    private final TrustStoreConfigurer trustStoreConfigurer;
     private final TrustStoreProperties trustStoreProperties;
     private final Environment environment;
 
@@ -31,12 +29,5 @@ public class HaliApplication implements CommandLineRunner {
         final String address = this.environment.getProperty("server.address", "localhost");
 
         log.info("Application running on {}:{}", address, port);
-
-        if (this.trustStoreProperties.isEnable()) {
-            log.info("Setting up trust store");
-            // This is enabled for e2e test, we are using Wiremock (as a server) so we need to define trust store
-            // Our app is going to "trust" the remote "wiremock server" in e2e test
-            this.trustStoreConfigurer.setupTrustStore(this.trustStoreProperties.getKeyStores());
-        }
     }
 }
